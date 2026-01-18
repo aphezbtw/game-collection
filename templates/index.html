@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="games-header">
+        <h1>
+            {% if my_games %}
+                <i class="fas fa-user"></i> Мои игры
+            {% elif search_query %}
+                <i class="fas fa-search"></i> Поиск: "{{ search_query }}"
+            {% else %}
+                <i class="fas fa-gamepad"></i> Коллекция видеоигр
+            {% endif %}
+        </h1>
+        
+        {% if not my_games %}
+        <div class="search-container">
+            <form action="{{ url_for('search') }}" method="GET">
+                <input type="text" 
+                       name="q" 
+                       class="search-input" 
+                       placeholder="Поиск игр по названию, жанру, разработчику..."
+                       value="{{ search_query if search_query else '' }}">
+                <i class="fas fa-search search-icon"></i>
+            </form>
+        </div>
+        {% endif %}
+        
+        {% if not games %}
+            <div style="text-align: center; color: white; padding: 3rem; background: rgba(255, 255, 255, 0.1); border-radius: var(--border-radius);">
+                <i class="fas fa-gamepad fa-3x" style="margin-bottom: 1rem; opacity: 0.8;"></i>
+                <h3 style="margin-bottom: 1rem;">
+                    {% if my_games %}
+                        У вас пока нет добавленных игр
+                    {% elif search_query %}
+                        По запросу "{{ search_query }}" ничего не найдено
+                    {% else %}
+                        Коллекция игр пуста
+                    {% endif %}
+                </h3>
+                <p style="margin-bottom: 2rem;">
+                    {% if my_games %}
+                        Добавьте свою первую игру!
+                    {% elif search_query %}
+                        Попробуйте другой запрос или добавьте игру
+                    {% else %}
+                        Будьте первым, кто добавит игру в коллекцию!
+                    {% endif %}
+                </p>
+                {% if current_user.is_authenticated and not search_query %}
+                    <a href="{{ url_for('add_game') }}" class="btn-primary">
+                        <i class="fas fa-plus"></i> Добавить первую игру
+                    </a>
+                {% endif %}
+                {% if search_query %}
+                    <a href="{{ url_for('index') }}" class="btn-primary">
+                        <i class="fas fa-home"></i> На главную
+                    </a>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="games-grid">
+                {% for game in games %}
+                    <div class="game-card">
+                        <div class="game-card-header">
+                            <h2 class="game-title">{{ game.title }}</h2>
+                            <div class="game-meta">
+                                <span><i class="fas fa-calendar"></i> {{ game.release_year }}</span>
+                                <span><i class="fas fa-clock"></i> {{ game.playtime_hours }} ч</span>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card-body">
+                            <span class="game-genre">
+                                <i class="fas fa-tag"></i> {{ game.genre }}
+                            </span>
+                            
+                            <p class="game-description">{{ game.description[:120] }}{% if game.description|length > 120 %}...{% endif %}</p>
+                            
+                            <div class="game-platforms">
+                                {% for platform in game.platforms.split(',')[:3] %}
+                                    <span class="platform-tag">{{ platform.strip() }}</span>
+                                {% endfor %}
+                                {% if game.platforms.split(',')|length > 3 %}
+                                    <span class="platform-tag">+{{ game.platforms.split(',')|length - 3 }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="game-card-footer">
+                            <span class="game-author">
+                                <i class="fas fa-user"></i> {{ game.author.username }}
+                            </span>
+                            
+                            <span class="game-rating">
+                                <i class="fas fa-star"></i> {{ "%.1f"|format(game.rating) }}
+                            </span>
+                        </div>
+                        
+                        <div class="game-actions">
+                            <a href="{{ url_for('game_detail', game_id=game.id) }}" 
+                               class="btn-primary">
+                                <i class="fas fa-info-circle"></i> Подробнее (откроется в новом окне)
+                            </a>
+                            
+                            {% if my_games %}
+                            <form action="{{ url_for('delete_game', game_id=game.id) }}" 
+                                  method="POST" 
+                                  class="delete-form"
+                                  onsubmit="return confirm('Удалить игру «{{ game.title }}»?')"
+                                  style="text-align: center; padding: 1rem;">
+                                <button type="submit" class="btn-danger">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
