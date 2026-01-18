@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GameCollection - Коллекция видеоигр{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <a href="{{ url_for('index') }}" class="logo">
+                    <i class="fas fa-gamepad"></i>
+                    <span>GameCollection</span>
+                </a>
+                
+                <div class="nav-links">
+                    <a href="{{ url_for('index') }}" class="nav-link">
+                        <i class="fas fa-home"></i> Главная
+                    </a>
+                    
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('add_game') }}" class="nav-link">
+                            <i class="fas fa-plus-circle"></i> Добавить игру
+                        </a>
+                        <a href="{{ url_for('my_games') }}" class="nav-link">
+                            <i class="fas fa-gamepad"></i> Мои игры
+                        </a>
+                        <span class="nav-link">
+                            <i class="fas fa-user-circle"></i> {{ current_user.username }}
+                        </span>
+                        <a href="{{ url_for('logout') }}" class="btn-primary">
+                            <i class="fas fa-sign-out-alt"></i> Выйти
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="nav-link">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </a>
+                        <a href="{{ url_for('register') }}" class="btn-primary">
+                            <i class="fas fa-user-plus"></i> Регистрация
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        {% if category == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif category == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Автоматическое скрытие flash сообщений
+        setTimeout(() => {
+            const flashes = document.querySelectorAll('.flash');
+            flashes.forEach(flash => {
+                flash.style.transition = 'opacity 0.5s ease';
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 500);
+            });
+        }, 5000);
+        
+        // Открытие детальной страницы в новом окне
+        document.querySelectorAll('.game-actions .btn-primary').forEach(btn => {
+            if(btn.textContent.includes('Подробнее')) {
+                btn.addEventListener('click', function(e) {
+                    // Открываем в новом окне/вкладке
+                    window.open(this.href, '_blank');
+                    e.preventDefault();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
