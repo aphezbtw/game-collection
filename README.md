@@ -290,7 +290,7 @@ Q: Как изменить пароль?
 A: В текущей версии функция смены пароля не реализована.
 
 Ссылки:
-- [GitHub репозиторий](https://github.com/ваш-username/games-collection)
+- [GitHub репозиторий](https://github.com/aphezbtw/games-collection)
 - [Живое демо](https://aphezbtw.pythonanywhere.com)
 - [Документация Flask](https://flask.palletsprojects.com/)
 - [PythonAnywhere Help](https://help.pythonanywhere.com/)
